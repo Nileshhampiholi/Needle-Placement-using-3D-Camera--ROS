@@ -1,6 +1,6 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <franka_example_controllers/joint_position_example_controller.h>
+#include <franka_example_controllers/joint_position_example_controller_sim.h>
 
 #include <cmath>
 
@@ -12,9 +12,9 @@
 
 namespace franka_example_controllers {
 
-bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hardware,
+bool JointPositionExampleControllerSim::init(hardware_interface::PositionJointInterface *hw,
                                           ros::NodeHandle& node_handle) {
-  position_joint_interface_ = robot_hardware->get<hardware_interface::PositionJointInterface>();
+  position_joint_interface_ = hw;
   if (position_joint_interface_ == nullptr) {
     ROS_ERROR(
         "JointPositionExampleController: Error getting position joint interface from hardware!");
@@ -56,18 +56,18 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
   return true;
 }
 
-void JointPositionExampleController::starting(const ros::Time& /* time */) {
+void JointPositionExampleControllerSim::starting(const ros::Time& /* time */) {
   for (size_t i = 0; i < 7; ++i) {
     initial_pose_[i] = position_joint_handles_[i].getPosition();
   }
   elapsed_time_ = ros::Duration(0.0);
 }
 
-void JointPositionExampleController::update(const ros::Time& /*time*/,
+void JointPositionExampleControllerSim::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
   elapsed_time_ += period;
 
-  double delta_angle = M_PI / 32 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec())) * 0.2;
+  double delta_angle = M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec())) * 0.2;
   for (size_t i = 0; i < 7; ++i) {
     if (i == 4) {
       position_joint_handles_[i].setCommand(initial_pose_[i] - delta_angle);
@@ -79,5 +79,5 @@ void JointPositionExampleController::update(const ros::Time& /*time*/,
 
 }  // namespace franka_example_controllers
 
-PLUGINLIB_EXPORT_CLASS(franka_example_controllers::JointPositionExampleController,
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::JointPositionExampleControllerSim,
                        controller_interface::ControllerBase)

@@ -40,7 +40,6 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
     }
   }
 
-  /*
   std::array<double, 7> q_start{{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
   for (size_t i = 0; i < q_start.size(); i++) {
     if (std::abs(position_joint_handles_[i].getPosition() - q_start[i]) > 0.1) {
@@ -51,7 +50,6 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
       return false;
     }
   }
-  */
 
   return true;
 }
@@ -67,7 +65,7 @@ void JointPositionExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
   elapsed_time_ += period;
 
-  double delta_angle = M_PI / 32 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec())) * 0.2;
+  double delta_angle = M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec())) * 0.2;
   for (size_t i = 0; i < 7; ++i) {
     if (i == 4) {
       position_joint_handles_[i].setCommand(initial_pose_[i] - delta_angle);
