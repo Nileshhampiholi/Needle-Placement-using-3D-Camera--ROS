@@ -14,6 +14,7 @@ namespace franka_example_controllers {
 
 bool JointPositionExampleControllerSim::init(hardware_interface::PositionJointInterface *hw,
                                           ros::NodeHandle& node_handle) {
+
   position_joint_interface_ = hw;
   if (position_joint_interface_ == nullptr) {
     ROS_ERROR(
@@ -40,44 +41,44 @@ bool JointPositionExampleControllerSim::init(hardware_interface::PositionJointIn
     }
   }
 
-  /*
-  std::array<double, 7> q_start{{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
-  for (size_t i = 0; i < q_start.size(); i++) {
-    if (std::abs(position_joint_handles_[i].getPosition() - q_start[i]) > 0.1) {
-      ROS_ERROR_STREAM(
-          "JointPositionExampleController: Robot is not in the expected starting position for "
-          "running this example. Run `roslaunch franka_example_controllers move_to_start.launch "
-          "robot_ip:=<robot-ip> load_gripper:=<has-attached-gripper>` first.");
-      return false;
-    }
+
+  for (auto &joint_handle : position_joint_handles_) {
+    command_.push_back(0.);
   }
-  */
+
+  command_sub_ = node_handle.subscribe<std_msgs::Float64MultiArray>(std::string("joint_command"), 1,
+      &JointPositionExampleControllerSim::setCommandCallback, this);
 
   return true;
 }
 
+
 void JointPositionExampleControllerSim::starting(const ros::Time& /* time */) {
-  for (size_t i = 0; i < 7; ++i) {
-    initial_pose_[i] = position_joint_handles_[i].getPosition();
-  }
-  elapsed_time_ = ros::Duration(0.0);
+    for (size_t i = 0; i < 7; ++i) {
+        initial_pose_[i] = position_joint_handles_[i].getPosition();
+    }
+    elapsed_time_ = ros::Duration(0.0);
 }
 
-void JointPositionExampleControllerSim::update(const ros::Time& /*time*/,
-                                            const ros::Duration& period) {
-  elapsed_time_ += period;
 
-  double delta_angle = M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec())) * 0.2;
-  for (size_t i = 0; i < 7; ++i) {
-    if (i == 4) {
-      position_joint_handles_[i].setCommand(initial_pose_[i] - delta_angle);
-    } else {
-      position_joint_handles_[i].setCommand(initial_pose_[i] + delta_angle);
+void JointPositionExampleControllerSim::update(const ros::Time&, const ros::Duration& period) {
+    elapsed_time_ += period;
+    for (size_t i = 0; i < position_joint_handles_.size(); i++) {
+        position_joint_handles_.at(i).setCommand(command_.at(i));
     }
-  }
+}
+
+
+void JointPositionExampleControllerSim::setCommandCallback(const std_msgs::Float64MultiArrayConstPtr &msg) {
+    command_ = msg->data;
 }
 
 }  // namespace franka_example_controllers
 
 PLUGINLIB_EXPORT_CLASS(franka_example_controllers::JointPositionExampleControllerSim,
                        controller_interface::ControllerBase)
+
+
+
+
+

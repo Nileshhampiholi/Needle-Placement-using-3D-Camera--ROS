@@ -10,6 +10,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
+#include <std_msgs/Float64MultiArray.h>
 
 namespace franka_example_controllers {
 
@@ -24,6 +25,10 @@ class JointPositionExampleControllerSim :  public controller_interface::Controll
   std::vector<hardware_interface::JointHandle> position_joint_handles_;
   ros::Duration elapsed_time_;
   std::array<double, 7> initial_pose_{};
+
+  ros::Subscriber command_sub_;
+  std::vector<double> command_;
+  void setCommandCallback(const std_msgs::Float64MultiArrayConstPtr &msg);
 };
 
 }  // namespace franka_example_controllers

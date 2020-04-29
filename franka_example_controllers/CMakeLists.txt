@@ -75,6 +75,11 @@ target_include_directories(franka_example_controllers PUBLIC
   include
 )
 
+add_executable(test_move_node src/test_move.cpp)
+target_link_libraries(test_move_node PUBLIC
+        ${catkin_LIBRARIES}
+        )
+
 ## Installation
 install(TARGETS franka_example_controllers
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
