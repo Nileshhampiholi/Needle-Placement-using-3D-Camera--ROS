@@ -1,0 +1,4 @@
+---
+
+  topic_name: "/joint_states"
+  queue_size: 5
