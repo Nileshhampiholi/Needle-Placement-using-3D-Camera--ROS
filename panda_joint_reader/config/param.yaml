@@ -1,0 +1,3 @@
+panda_joint_reader:   
+    topic_name: "/joint_states"
+    queue_size: 5
