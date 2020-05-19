@@ -1,0 +1,6 @@
+<launch>
+
+   <node name = "fow_kin_server" pkg = "panda_joint_reader" type = "fow_kin_server.py"/>
+   <node name = "fow_kin_client" pkg = "panda_joint_reader" type = "fow_kin_client.py" output= "screen" />
+
+</launch>
