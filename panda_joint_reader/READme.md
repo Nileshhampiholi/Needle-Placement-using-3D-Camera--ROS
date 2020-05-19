@@ -2,7 +2,7 @@ Editor- Yash Shah, Nilesh Hampiholi
 
 To start forward kinematics. Pull the code from master branch. I would suggest delete every file of the franka panda robot 
 inside your cd catkin_ws/src and pull all the packages once again, because I have not only made changes in panda_joint_reader 
-package but franka_msgs also
+package but franka_msgs also. Once you setup everything from the master branch
 
 type this commands in terminal
 
