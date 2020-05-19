@@ -15,8 +15,7 @@ private:
     int counter = 0;
     ros::Publisher command_pub = nh_.advertise<std_msgs::Float64MultiArray>("/joint_position_example_controller_sim/joint_command", 1000);
     std::vector<double> init_position = {0,-0.5,0,-2.5,0,2,0};
-
-
+    
 public:
 
     // Initialize

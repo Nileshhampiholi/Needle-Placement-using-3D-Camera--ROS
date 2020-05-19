@@ -1,0 +1,4 @@
+<launch>
+   <param name ="~joint_move_dist" value ="30.0"/>
+   <node name ="test_move_node" pkg ="franka_example_controllers" type ="test_move_node"/>
+</launch>
