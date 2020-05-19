@@ -24,14 +24,38 @@ def compute_rotation_matrix(parameters):
      return R
 
 def compute_joint_postions(rotation_matrices):
-    T=[]
-    X= [ [1,0,0,0], [0,1,0,0],[0,0,1,0] ,[0,0,0,1]]
-    for i in range(0,8):
+     T=[]
+     X= [ [1,0,0,0], [0,1,0,0],[0,0,1,0] ,[0,0,0,1]]
+     for i in range(0,8):
         X = np.dot(X ,rotation_matrices[i])
         #print(X)
         T.append(X)
-    return T
-         
+     return T
+
+def compute_quaternions(R):
+      magnitude = [
+       math.sqrt(abs ( 1 + R[0][0] + R[1][1] + R[2][2] ) /4 ) ,
+       math.sqrt(abs ( 1 + R[0][0] - R[1][1] - R[2][2] ) /4 ) ,
+       math.sqrt(abs ( 1 - R[0][0] + R[1][1] - R[2][2] ) /4 ) ,
+       math.sqrt(abs ( 1 - R[0][0] - R[1][1] + R[2][2] ) /4 ) ,
+        ]
+      quaternion = [
+        max(magnitude),
+        ( R[2][1] - R[1][2] /( 4 * max(magnitude))),
+        ( R[0][2] - R[2][0] /( 4 * max(magnitude))),
+        ( R[1][0] - R[0][1] /( 4 * max(magnitude)))
+        ]
+      return quaternion
+
+def joint_position_quaternions(rotation_matrices):
+     joint_position_quaternion = []
+     q = 0
+     for i in range(len(rotation_matrices)):
+         q = compute_quaternions(rotation_matrices[i])
+         joint_position_quaternion.append(q)
+     return joint_position_quaternion
+
+
 x = math.pi/2
 
 dh_parameters = [
@@ -46,13 +70,8 @@ dh_parameters = [
       ] 
   
 rotation = compute_rotation_matrix(dh_parameters)
-T = compute_joint_postions(rotation)
+joint_postions = compute_joint_postions(rotation)
+joint_position_quaternions = joint_position_quaternions(joint_postions)
 
-
-for i in range(0,8):
-     print(rotation[i],'')
-
-
-for i in range(0,8):
-     print(T[i],'')
-
+for i in range(len(joint_position_quaternions)):
+    print (joint_position_quaternions[i],"")
