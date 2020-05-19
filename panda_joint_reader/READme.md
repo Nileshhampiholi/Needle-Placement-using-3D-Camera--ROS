@@ -1,0 +1,20 @@
+Editor- Yash Shah, Nilesh Hampiholi
+
+To start forward kinematics. Pull the code from master branch. I would suggest delete every file of the franka panda robot 
+inside your cd catkin_ws/src and pull all the packages once again, because I have not only made changes in panda_joint_reader 
+package but franka_msgs also
+
+type this commands in terminal
+
+1. cd catkin_ws (or the workspace in which you are working)
+2. catkin_make
+3. source devel/setup.bash
+4. roslaunch franka_example_controllers joint_position_example_controller_sim.launch
+    New Terminal
+5. roslaunch franka_example_controllers test_move_node.launch
+    New Terminal
+6. roslaunch panda_joint_reader fow_kin.launch
+
+You can see in the terminal the cartesian coordinates of the end effector
+
+If you find any difficulties feel free to contact me.
