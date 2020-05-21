@@ -1,0 +1,3 @@
+float64[] dh_parameters
+---
+robot_kinematics/kinematics_msgs  current_position

@@ -55,6 +55,44 @@ def joint_position_quaternions(rotation_matrices):
          joint_position_quaternion.append(q)
      return joint_position_quaternion
 
+def compute_roll_pitch_yaw(transfromation_matrix):
+     roll_pitch_yaw = []
+     
+     for i in range(len(transfromation_matrix)):
+            rpy = []
+            if transfromation_matrix[i][2][0] != abs(1):
+               pitch = -math.asin(transfromation_matrix[i][2][0])
+               roll = math.atan2(transfromation_matrix[i][2][1]/math.cos(pitch), transfromation_matrix[i][2][2]/math.cos(pitch))
+               yaw = math.atan2(transfromation_matrix[i][1][0]/math.cos(pitch), transfromation_matrix[i][0][0]/math.cos(pitch))
+
+            else:
+               yaw = 0
+               if transfromation_matrix[i][2][0] == 1:
+                    pitch = math.pi/2
+                    roll = math.atan2(transfromation_matrix[i][0][1], transfromation_matrix[i][0][2])
+
+               else:
+                    pitch = -math.pi/2
+                    roll = math.atan2(-transfromation_matrix[i][0][1], -transfromation_matrix[i][0][2])
+            rpy.append(roll)
+            rpy.append(pitch)
+            rpy.append(yaw)
+            roll_pitch_yaw.append(rpy)
+             
+     return roll_pitch_yaw           
+
+
+def get_cartesian_cordinates(transfromation_matrix):
+       cartesian_cordinates = []
+       for i in range(len(transfromation_matrix)):
+            c_c = [
+            transfromation_matrix [i][0][3],
+            transfromation_matrix [i][1][3],
+            transfromation_matrix [i][2][3]
+            ]
+            cartesian_cordinates.append(c_c)
+       return cartesian_cordinates
+
 
 x = math.pi/2
 
@@ -70,8 +108,25 @@ dh_parameters = [
       ] 
   
 rotation = compute_rotation_matrix(dh_parameters)
+
 joint_postions = compute_joint_postions(rotation)
+
 joint_position_quaternions = joint_position_quaternions(joint_postions)
 
-for i in range(len(joint_position_quaternions)):
-    print (joint_position_quaternions[i],"")
+roll_pitch_yaw = compute_roll_pitch_yaw(joint_postions)
+
+#for i in range(len(joint_position_quaternions)):
+ #   print (joint_position_quaternions[i],"")
+
+ 
+cartesian_cordinates = get_cartesian_cordinates(joint_postions)
+
+
+#for i in range(len(roll_pitch_yaw)):
+  #  print (roll_pitch_yaw[i],"")
+
+print (joint_postions[0][0][3])
+print (joint_postions[0])
+print ("")
+for i in range(len(cartesian_cordinates)):
+     print (cartesian_cordinates[i],"")

@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
+from robot_kinematics.srv import forward_kinematics_server
+from robot_kinematics.srv import forward_kinematics_serverRequest
+from robot_kinematics.srv import forward_kinematics_serverResponse
+
+from robot_kinematics.msg import kinematics_msgs
+
 import rospy
-from sensor_msgs.msg import JointState
+import numpy as np 
 import math
-import numpy as np
 
 
-def callback(message):
-    position  = message.position
+def handle_compute_kinematics(message):
+    position  = message.dh_parameters
+    current_position = kinematics_msgs()
     
     dh_parameters = [
     [position[0],   0.0,       0.333,   0.0    ] ,
@@ -19,12 +25,20 @@ def callback(message):
     [position[6],   math.pi/2, 0.0,     0.088  ] ,
     [0,             0,         0.107,   0.0    ] ,
     ] 
+    
     rotation_matrix = compute_rotation_matrix(dh_parameters) 
-    trasfromation_matrix = compute_joint_postions(rotation_matrix)
-    joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
-    roll_pitch_yaw = compute_roll_pitch_yaw(trasfromation_matrix)
-    cartesian_cordinates = get_cartesian_cordinates(trasfromation_matrix)
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', joint_position_quaternions)  
+
+    current_position.transformation_matrix = compute_joint_postions(rotation_matrix)
+
+    current_position.quaternions = compute_joint_position_quaternions(current_position.transformation_matrix)
+
+    current_position.roll_pitch_yaw = compute_roll_pitch_yaw(current_position.transformation_matrix)
+    
+    current_position.cartesian_cordinates = get_cartesian_cordinates(current_position.trasfromation_matrix)
+
+    print "Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order"
+    return forward_kinematics_serverResponse(current_position)
+
 
 def forward_kinematics():
     rospy.init_node('forward_kinematics', anonymous=True)
@@ -117,10 +131,13 @@ def get_cartesian_cordinates(transfromation_matrix):
        return cartesian_cordinates
 
 
-if __name__ == '__main__':
-    forward_kinematics()
-
-  
 
 
-
+def compute_forward_kinematics_service():
+    rospy.init_node('forward_kinmatics_service_node')
+    s = rospy.Service('compute_forward_kinematics_service',forward_kinematics_server, handle_compute_kinematics)
+    print "Ready to compute forward kinematics."
+    rospy.spin()
+    
+if __name__ == "__main__":
+    compute_forward_kinematics_service()
