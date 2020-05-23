@@ -1,14 +1,13 @@
 #!/usr/bin/env python
+import rospy
+import numpy as np 
+import math
 
 from robot_kinematics.srv import forward_kinematics_server
 from robot_kinematics.srv import forward_kinematics_serverRequest
 from robot_kinematics.srv import forward_kinematics_serverResponse
 
 from robot_kinematics.msg import kinematics_msgs
-
-import rospy
-import numpy as np 
-import math
 
 
 def handle_compute_kinematics(message):
@@ -34,9 +33,9 @@ def handle_compute_kinematics(message):
 
     current_position.roll_pitch_yaw = compute_roll_pitch_yaw(current_position.transformation_matrix)
     
-    current_position.cartesian_cordinates = get_cartesian_cordinates(current_position.trasfromation_matrix)
+    current_position.cartesian_cordinates = get_cartesian_cordinates(current_position.transformation_matrix)
 
-    print "Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order"
+    print ("Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order")
     return forward_kinematics_serverResponse(current_position)
 
 
@@ -134,9 +133,9 @@ def get_cartesian_cordinates(transfromation_matrix):
 
 
 def compute_forward_kinematics_service():
-    rospy.init_node('forward_kinmatics_service_node')
+    rospy.init_node("forward_kinmatics_service_node")
     s = rospy.Service('compute_forward_kinematics_service',forward_kinematics_server, handle_compute_kinematics)
-    print "Ready to compute forward kinematics."
+    print ("Ready to compute forward kinematics.")
     rospy.spin()
     
 if __name__ == "__main__":
