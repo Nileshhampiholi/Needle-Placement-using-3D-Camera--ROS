@@ -63,7 +63,7 @@ def compute_rotation_matrix(parameters):
 def compute_joint_postions(rotation_matrices):
     T=[]
     X= np.identity(4)
-    for i in range(0,8):
+    for i in range(len(rotation_matrices)):
         X = np.dot(X ,rotation_matrices[i])
         #print(X)
         T.append(X)
@@ -71,22 +71,21 @@ def compute_joint_postions(rotation_matrices):
 
 def compute_quaternions(R):
       magnitude = [
-       math.sqrt(abs ( 1 + R[0][0] + R[1][1] + R[2][2] ) /4 ) ,
-       math.sqrt(abs ( 1 + R[0][0] - R[1][1] - R[2][2] ) /4 ) ,
-       math.sqrt(abs ( 1 - R[0][0] + R[1][1] - R[2][2] ) /4 ) ,
-       math.sqrt(abs ( 1 - R[0][0] - R[1][1] + R[2][2] ) /4 ) ,
+       math.sqrt(abs ( 1.0 + R[0][0] + R[1][1] + R[2][2] ) /4.0 ) ,
+       math.sqrt(abs ( 1.0 + R[0][0] - R[1][1] - R[2][2] ) /4.0 ) ,
+       math.sqrt(abs ( 1.0 - R[0][0] + R[1][1] - R[2][2] ) /4.0 ) ,
+       math.sqrt(abs ( 1.0 - R[0][0] - R[1][1] + R[2][2] ) /4.0 ) ,
         ]
       quaternion = [
         max(magnitude),
-        ( R[2][1] - R[1][2] /( 4 * max(magnitude))),
-        ( R[0][2] - R[2][0] /( 4 * max(magnitude))),
-        ( R[1][0] - R[0][1] /( 4 * max(magnitude)))
+        ( R[2][1] - R[1][2] /( 4.0 * max(magnitude))),
+        ( R[0][2] - R[2][0] /( 4.0 * max(magnitude))),
+        ( R[1][0] - R[0][1] /( 4.0 * max(magnitude)))
         ]
       return quaternion
 
 def compute_joint_position_quaternions(rotation_matrices):
      joint_position_quaternion = []
-     q = 0
      for i in range(len(rotation_matrices)):
          q = compute_quaternions(rotation_matrices[i])
          joint_position_quaternion.append(q)
@@ -103,8 +102,8 @@ def compute_roll_pitch_yaw(transfromation_matrix):
                yaw = math.atan2(transfromation_matrix[i][1][0]/math.cos(pitch), transfromation_matrix[i][0][0]/math.cos(pitch))
 
             else:
-               yaw = 0
-               if transfromation_matrix[i][2][0] == 1:
+               yaw = 0.0
+               if transfromation_matrix[i][2][0] == 1.0:
                     pitch = math.pi/2
                     roll = math.atan2(transfromation_matrix[i][0][1], transfromation_matrix[i][0][2])
 
