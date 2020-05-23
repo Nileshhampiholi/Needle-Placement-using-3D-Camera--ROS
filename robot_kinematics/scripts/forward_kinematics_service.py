@@ -47,10 +47,10 @@ def forward_kinematics():
     rospy.spin()
 
 def rotation_matrix(dh):
-    T = [[math.cos(dh[0]),             -math.sin(dh[0]),         0,            dh[3]],
+    T = [[math.cos(dh[0]),                 -math.sin(dh[0]),                    0.0,              dh[3]],
          [math.sin(dh[0])*math.cos(dh[1]),  math.cos(dh[0])* math.cos(dh[1]),  -math.sin(dh[1]), -math.sin(dh[1])*dh[2]],
          [math.sin(dh[0])*math.sin(dh[1]),  math.cos(dh[0])* math.sin(dh[1]) ,  math.cos(dh[1]),  math.cos(dh[1])*dh[2]],
-         [0  ,                    0    ,                    0     ,      1      ]        ]
+         [0.0 ,                             0.0   ,                             0.0     ,         1.0      ]        ]
     return T 
 
 def compute_rotation_matrix(parameters):
@@ -128,9 +128,6 @@ def get_cartesian_cordinates(transfromation_matrix):
             ]
             cartesian_cordinates.append(c_c)
        return cartesian_cordinates
-
-
-
 
 def compute_forward_kinematics_service():
     rospy.init_node("forward_kinmatics_service_node")
