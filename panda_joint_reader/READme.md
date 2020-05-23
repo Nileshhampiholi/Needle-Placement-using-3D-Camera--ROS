@@ -1,11 +1,10 @@
 Editor- Yash Shah, Nilesh Hampiholi
 
-To start forward kinematics. Pull the code from master branch. I would suggest to delete whole catkin_ws of the franka panda robot . Make a new catkin_ws ( http://wiki.ros.org/catkin/Tutorials/create_a_workspace ) inside your cd catkin_ws/src and pull all the packages once again, because I have not only made changes in panda_joint_reader 
-package but franka_msgs also. Once you setup everything from the master branch
+To start forward kinematics. Pull the code from master branch. I would suggest to delete whole catkin_ws of the franka panda robot . Make a new catkin_ws ( http://wiki.ros.org/catkin/Tutorials/create_a_workspace ) and pull all the packages once again, because I have not only made changes in panda_joint_reader package but franka_msgs also. Once you setup everything from the master branch
 
 type this commands in terminal
 
-1 cd catkin_ws (or the workspace in which you are working)
+1. cd catkin_ws (or the workspace in which you are working)
 
 2. catkin_make
 
