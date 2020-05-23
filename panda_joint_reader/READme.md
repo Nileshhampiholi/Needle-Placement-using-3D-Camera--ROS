@@ -15,9 +15,13 @@ type this commands in terminal
 3.2 chmod +x src/Franka_Panda/panda_joint_reader/scripts/fow_kin_client.py
 
 4. roslaunch franka_example_controllers joint_position_example_controller_sim.launch
+
     New Terminal
+    
 5. roslaunch franka_example_controllers test_move_node.launch
+
     New Terminal
+    
 6. roslaunch panda_joint_reader fow_kin.launch
 
 You can see in the terminal the cartesian coordinates of the end effector
