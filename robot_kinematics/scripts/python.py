@@ -129,4 +129,7 @@ print (joint_postions[0][0][3])
 print (joint_postions[0])
 print ("")
 for i in range(len(cartesian_cordinates)):
+     print ("cordinates of frame ",i)
      print (cartesian_cordinates[i],"")
+     
+
