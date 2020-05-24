@@ -24,7 +24,15 @@ def callback(message):
     joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
     roll_pitch_yaw = compute_roll_pitch_yaw(trasfromation_matrix)
     cartesian_cordinates = get_cartesian_cordinates(trasfromation_matrix)
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', joint_position_quaternions)  
+    
+    for i in range (0,8):
+        print(trasfromation_matrix[i],'')
+        print(joint_position_quaternions[i],'')
+        print(roll_pitch_yaw[i],'')
+        print(cartesian_cordinates[i],'')
+    
+    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', [])  
+
 
 def forward_kinematics():
     rospy.init_node('forward_kinematics', anonymous=True)
