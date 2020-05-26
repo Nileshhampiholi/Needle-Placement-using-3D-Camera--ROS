@@ -108,10 +108,6 @@ if __name__ == '__main__':
     
     
     rospy.init_node('fow_kin')
-    t = time.localtime()
-    millis = int(round(time.time() * 1000))
-    print(millis)
-    print ("%.20f" % time.time())
 
 
     trans = []
