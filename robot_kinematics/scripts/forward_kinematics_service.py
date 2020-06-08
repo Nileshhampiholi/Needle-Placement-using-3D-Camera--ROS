@@ -23,7 +23,7 @@ def handle_compute_kinematics(message):
     [position[5],   math.pi/2, 0.0,     0.0    ] ,
     [position[6],   math.pi/2, 0.0,     0.088  ] ,
     [0,             0,         0.107,   0.0    ] ,
-    ] , dtype= float)
+    ] , dtype= 'float32')
     
     rotation_matrix = compute_rotation_matrix(dh_parameters) 
 
@@ -34,9 +34,9 @@ def handle_compute_kinematics(message):
     current_position.roll_pitch_yaw = compute_roll_pitch_yaw(current_position.transformation_matrix)
     
     current_position.cartesian_cordinates = get_cartesian_cordinates(current_position.transformation_matrix)
-
-
+    
     print ("Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order")
+    
     return forward_kinematics_serverResponse(current_position)
 
 
@@ -72,12 +72,12 @@ def compute_quaternions(R):
        math.sqrt(abs ( 1.0 - R[0][0] + R[1][1] - R[2][2] ) /4.0 ) ,
        math.sqrt(abs ( 1.0 - R[0][0] - R[1][1] + R[2][2] ) /4.0 ) ,
         ]
-      quaternion = [
+      quaternion = np.array([
         max(magnitude),
         ( R[2][1] - R[1][2] /( 4.0 * max(magnitude))),
         ( R[0][2] - R[2][0] /( 4.0 * max(magnitude))),
         ( R[1][0] - R[0][1] /( 4.0 * max(magnitude)))
-        ]
+        ], dtype= 'float32')
       return quaternion
 
 def compute_joint_position_quaternions(rotation_matrices):
@@ -116,11 +116,11 @@ def compute_roll_pitch_yaw(transfromation_matrix):
 def get_cartesian_cordinates(transfromation_matrix):
        cartesian_cordinates = []
        for i in range(len(transfromation_matrix)):
-            c_c = [
+            c_c =np.array( [
             transfromation_matrix [i][0][3],
             transfromation_matrix [i][1][3],
             transfromation_matrix [i][2][3]
-            ]
+            ], dtype = 'float32')
             cartesian_cordinates.append(c_c)
        return cartesian_cordinates
 

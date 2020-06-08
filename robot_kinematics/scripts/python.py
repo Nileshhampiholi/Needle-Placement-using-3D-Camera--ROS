@@ -2,7 +2,7 @@ import math
 from array import *
 import numpy as np
 import sympy as sym
-
+from kinematics_msgs.msg import *
 c1, c2, c3, c4, c5, c6, c7 = sym.symbols("c1, c2, c3, c4, c5, c6, c7")
 
 s1, s2, s3, s4, s5, s6, s7 = sym.symbols("s1, s2, s3, s4, s5, s6, s7")
@@ -125,7 +125,8 @@ def compute_inverse_kinematics(x_current, x_goal, traslation_part , rotation_par
           differential_x = epsilon* delta_x
           jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
           pesudo_inverse = np.linalg.pinv(jacobian, epsilon)
-          delta_q = np.dot(pesudo_inverse, joint_states)q_new = joint_states + delta_q
+          delta_q = np.dot(pesudo_inverse, joint_states)
+          q_new = joint_states + delta_q
           #poublish Q
 
 

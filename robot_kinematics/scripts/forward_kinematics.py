@@ -4,51 +4,42 @@ import rospy
 from sensor_msgs.msg import JointState
 import math
 import numpy as np
+from geometry_msgs.msg import Transform
+from robot_kinematics.msg import kinematics_msgs
 
 
 def callback(message):
-    position  = message.position
-    
-    dh_parameters = [
-    [position[0],   0.0,       0.333,   0.0    ] ,
-    [position[1],  -math.pi/2, 0.0,     0.0    ] ,
-    [position[2],   math.pi/2, 0.316,   0.0    ] ,
-    [position[3],   math.pi/2, 0.0,     0.0825 ] ,
-    [position[4],  -math.pi/2, 0.384,  -0.0825 ] ,
-    [position[5],   math.pi/2, 0.0,     0.0    ] ,
-    [position[6],   math.pi/2, 0.0,     0.088  ] ,
-    [0,             0,         0.107,   0.0    ] ,
-    ] 
-    rotation_matrix = compute_rotation_matrix(dh_parameters) 
-    trasfromation_matrix = compute_joint_postions(rotation_matrix)
-    joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
-    roll_pitch_yaw = compute_roll_pitch_yaw(trasfromation_matrix)
-    cartesian_cordinates = get_cartesian_cordinates(trasfromation_matrix)
-    rotation_part = compute_rotation_part(trasfromation_matrix)
-    
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s',1 ) 
-    for i in range (0,8):
-        print ''
-        print "Transformation matrix T_0_to_",i
-        print ''
-        print trasfromation_matrix[i]
-        print ''
-        print 'Quaternion of frame : ',i
-        print ''
-        print joint_position_quaternions[i]
-        print ''
-        print 'Roll_pitch_yaw of frame',i
-        print ''
-        print roll_pitch_yaw[i]
-        print ''
-        print 'Cartesian Co-ordinates  of frame',i
-        print ''
-        print cartesian_cordinates[i]
-        print''
-    
+     position  = message.position
+     current_position = kinematics_msgs()
+     dh_parameters = [
+     [position[0],   0.0,       0.333,   0.0    ] ,
+     [position[1],  -math.pi/2, 0.0,     0.0    ] ,
+     [position[2],   math.pi/2, 0.316,   0.0    ] ,
+     [position[3],   math.pi/2, 0.0,     0.0825 ] ,
+     [position[4],  -math.pi/2, 0.384,  -0.0825 ] ,
+     [position[5],   math.pi/2, 0.0,     0.0    ] ,
+     [position[6],   math.pi/2, 0.0,     0.088  ] ,
+     [0,             0,         0.107,   0.0    ] ,
+     ] 
+     frame = 0
+     rotation_matrix = compute_rotation_matrix(dh_parameters) 
+     trasfromation_matrix = compute_joint_postions(rotation_matrix)
+     joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
+     roll_pitch_yaw = compute_roll_pitch_yaw(trasfromation_matrix)
+     cartesian_cordinates = get_cartesian_cordinates(trasfromation_matrix)
+     rotation_part = compute_rotation_part(trasfromation_matrix)
      
+     current_position.transformation_matrix = trasfromation_matrix
+     current_position.cartesian_cordinates = cartesian_cordinates
+     current_position.quaternions= joint_position_quaternions
+     current_position.roll_pitch_yaw = roll_pitch_yaw
 
 
+     rospy.loginfo(rospy.get_caller_id() + 'I heard %s',1 ) 
+     pub = rospy.Publisher('robot_kinematics', kinematics_msgs, queue_size=10)
+     pub.publish(current_position)
+     print (current_position)
+     
 def forward_kinematics():
     rospy.init_node('forward_kinematics', anonymous=True)
     topic = "/joint_states"
@@ -86,12 +77,12 @@ def compute_quaternions(R):
        math.sqrt(abs ( 1 - R[0][0] + R[1][1] - R[2][2] ) /4 ) ,
        math.sqrt(abs ( 1 - R[0][0] - R[1][1] + R[2][2] ) /4 ) ,
         ]
-      quaternion = [
+      quaternion =np.array( [
         max(magnitude),
         ( R[2][1] - R[1][2] /( 4 * max(magnitude))),
         ( R[0][2] - R[2][0] /( 4 * max(magnitude))),
         ( R[1][0] - R[0][1] /( 4 * max(magnitude)))
-        ]
+        ])
       return quaternion
 
 def compute_joint_position_quaternions(rotation_matrices):
@@ -100,6 +91,7 @@ def compute_joint_position_quaternions(rotation_matrices):
      for i in range(len(rotation_matrices)):
          q = compute_quaternions(rotation_matrices[i])
          joint_position_quaternion.append(q)
+     #joint_position_quaternion = np.array(joint_position_quaternion)
      return joint_position_quaternion
 
 def compute_roll_pitch_yaw(transfromation_matrix):
@@ -131,11 +123,11 @@ def compute_roll_pitch_yaw(transfromation_matrix):
 def get_cartesian_cordinates(transfromation_matrix):
        cartesian_cordinates = []
        for i in range(len(transfromation_matrix)):
-            c_c = [
+            c_c = np.array( [
             transfromation_matrix [i][0][3],
             transfromation_matrix [i][1][3],
             transfromation_matrix [i][2][3]
-            ]
+            ])
             cartesian_cordinates.append(c_c)
        return cartesian_cordinates
 
