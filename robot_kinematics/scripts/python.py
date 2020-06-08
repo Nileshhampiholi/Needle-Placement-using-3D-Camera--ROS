@@ -117,7 +117,19 @@ def compute_jacobian(rotation_part, traslation_part):
      jacobian = np.transpose(jacobian)
      return jacobian
    
-   
+def compute_inverse_kinematics(x_current, x_goal, traslation_part , rotation_part,joint_states):
+     epsilon = 0.0001
+     delta_x = x_goal - x_current
+     while(delta_x>=epsilon):
+          delta_x = x_goal - x_current
+          differential_x = epsilon* delta_x
+          jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
+          pesudo_inverse = np.linalg.pinv(jacobian, epsilon)
+          delta_q = np.dot(pesudo_inverse, joint_states)q_new = joint_states + delta_q
+          #poublish Q
+
+
+
 x = math.pi/2
 
 dh_parameters = [

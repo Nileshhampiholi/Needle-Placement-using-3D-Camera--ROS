@@ -14,7 +14,7 @@ def handle_compute_kinematics(message):
     position  = message.dh_parameters
     current_position = kinematics_msgs()
     
-    dh_parameters = [
+    dh_parameters =np.array ( [
     [position[0],   0.0,       0.333,   0.0    ] ,
     [position[1],  -math.pi/2, 0.0,     0.0    ] ,
     [position[2],   math.pi/2, 0.316,   0.0    ] ,
@@ -23,7 +23,7 @@ def handle_compute_kinematics(message):
     [position[5],   math.pi/2, 0.0,     0.0    ] ,
     [position[6],   math.pi/2, 0.0,     0.088  ] ,
     [0,             0,         0.107,   0.0    ] ,
-    ] 
+    ] , dtype= float)
     
     rotation_matrix = compute_rotation_matrix(dh_parameters) 
 
@@ -35,22 +35,17 @@ def handle_compute_kinematics(message):
     
     current_position.cartesian_cordinates = get_cartesian_cordinates(current_position.transformation_matrix)
 
+
     print ("Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order")
     return forward_kinematics_serverResponse(current_position)
 
 
-def forward_kinematics():
-    rospy.init_node('forward_kinematics', anonymous=True)
-    topic = "/joint_states"
-    rospy.Subscriber(topic, JointState, callback)
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
 
 def rotation_matrix(dh):
-    T = [[math.cos(dh[0]),                 -math.sin(dh[0]),                    0.0,              dh[3]],
+    T = np.array([[math.cos(dh[0]),                 -math.sin(dh[0]),                    0.0,              dh[3]],
          [math.sin(dh[0])*math.cos(dh[1]),  math.cos(dh[0])* math.cos(dh[1]),  -math.sin(dh[1]), -math.sin(dh[1])*dh[2]],
          [math.sin(dh[0])*math.sin(dh[1]),  math.cos(dh[0])* math.sin(dh[1]) ,  math.cos(dh[1]),  math.cos(dh[1])*dh[2]],
-         [0.0 ,                             0.0   ,                             0.0     ,         1.0      ]        ]
+         [0.0 ,                             0.0   ,                             0.0     ,         1.0      ]        ] ,dtype= "float32")
     return T 
 
 def compute_rotation_matrix(parameters):
@@ -62,11 +57,12 @@ def compute_rotation_matrix(parameters):
 
 def compute_joint_postions(rotation_matrices):
     T=[]
-    X= np.identity(4)
+    X= np.identity(4,dtype = 'float32')
     for i in range(len(rotation_matrices)):
         X = np.dot(X ,rotation_matrices[i])
         #print(X)
         T.append(X)
+        
     return T
 
 def compute_quaternions(R):

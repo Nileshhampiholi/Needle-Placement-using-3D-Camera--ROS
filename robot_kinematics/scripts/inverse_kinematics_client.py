@@ -23,7 +23,7 @@ def callback(message):
     position  = message.position
     #print(position)
     current_position = compute_forward_kinematics_client(position)
-    print(current_position)
+    print " Trasnformation matrix   =  %s"%( current_position)
 
 
 
@@ -36,5 +36,3 @@ def get_current_position():
 
 if __name__ == '__main__':
     get_current_position()
-    
-    
