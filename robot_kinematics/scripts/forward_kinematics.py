@@ -24,16 +24,16 @@ def callback(message):
      frame = 0
      rotation_matrix = compute_rotation_matrix(dh_parameters) 
      trasfromation_matrix = compute_joint_postions(rotation_matrix)
-     joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
+     #joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
      roll_pitch_yaw = compute_roll_pitch_yaw(trasfromation_matrix)
      cartesian_cordinates = get_cartesian_cordinates(trasfromation_matrix)
      rotation_part = compute_rotation_part(trasfromation_matrix)
+     jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
+     xyz_roll_pitch_yaw = join_vectors(cartesian_cordinates, roll_pitch_yaw)
      
      current_position.transformation_matrix = trasfromation_matrix
-     current_position.cartesian_cordinates = cartesian_cordinates
-     current_position.quaternions= joint_position_quaternions
-     current_position.roll_pitch_yaw = roll_pitch_yaw
-
+     current_position.xyz_roll_pitch_yaw =xyz_roll_pitch_yaw
+     current_position.jacobian = jacobian
 
      rospy.loginfo(rospy.get_caller_id() + 'I heard %s',1 ) 
      pub = rospy.Publisher('robot_kinematics', kinematics_msgs, queue_size=10)
@@ -46,6 +46,13 @@ def forward_kinematics():
     rospy.Subscriber(topic, JointState, callback)
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
+
+def join_vectors(cartesian_cordinates, roll_pitch_yaw):
+     xyz_roll_pitch_yaw = []
+     for i in range(len(cartesian_cordinates)):
+          xr = np.append(cartesian_cordinates[i],roll_pitch_yaw[i])
+          xyz_roll_pitch_yaw.append(xr)
+     return xyz_roll_pitch_yaw
 
 def rotation_matrix(dh):
     T = [[math.cos(dh[0]),             -math.sin(dh[0]),         0,            dh[3]],
@@ -70,7 +77,7 @@ def compute_joint_postions(rotation_matrices):
         T.append(X)
     return T
 
-def compute_quaternions(R):
+'''def compute_quaternions(R):
       magnitude = [
        math.sqrt(abs ( 1 + R[0][0] + R[1][1] + R[2][2] ) /4 ) ,
        math.sqrt(abs ( 1 + R[0][0] - R[1][1] - R[2][2] ) /4 ) ,
@@ -85,7 +92,7 @@ def compute_quaternions(R):
         ])
       return quaternion
 
-def compute_joint_position_quaternions(rotation_matrices):
+def compute_joint_position_quaternions(rotation_matrices):'''
      joint_position_quaternion = []
      q = 0
      for i in range(len(rotation_matrices)):
@@ -130,6 +137,23 @@ def get_cartesian_cordinates(transfromation_matrix):
             ])
             cartesian_cordinates.append(c_c)
        return cartesian_cordinates
+
+def compute_rotation_part(transfromation_matrix):
+     rotation_part = []
+     for i in range(len(transfromation_matrix)):
+          temp = np.array(transfromation_matrix[i][:3, :3])
+          rotation_part.append(temp)
+     rotation_part = np.array(rotation_part)
+     return rotation_part
+
+def compute_jacobian(rotation_part, traslation_part):
+     jacobian = np.zeros((7,6))
+     for i in range (len(rotation_part)-1):
+          n = len(rotation_part) - 1
+          cross_product = np.cross(np.array(rotation_part[i][:,2]),(np.array(np.array(traslation_part[n]) -traslation_part[i])))
+          jacobian[i] = np.append(  cross_product,     rotation_part[i][:,2] ,axis =0  )
+     jacobian = np.transpose(jacobian)
+     return jacobian
 
 def compute_rotation_part(transfromation_matrix):
      rotation_part = []

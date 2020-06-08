@@ -2,7 +2,6 @@ import math
 from array import *
 import numpy as np
 import sympy as sym
-from kinematics_msgs.msg import *
 c1, c2, c3, c4, c5, c6, c7 = sym.symbols("c1, c2, c3, c4, c5, c6, c7")
 
 s1, s2, s3, s4, s5, s6, s7 = sym.symbols("s1, s2, s3, s4, s5, s6, s7")
@@ -148,6 +147,8 @@ rotation = compute_rotation_matrix(dh_parameters)
 
 joint_postions = compute_homogenous_transfromation_matrix(rotation)
 
+
+
 joint_position_quaternions = joint_position_quaternions(joint_postions)
 
 roll_pitch_yaw = compute_roll_pitch_yaw(joint_postions)
@@ -157,11 +158,20 @@ cartesian_cordinates = get_cartesian_cordinates(joint_postions)
 rotation_part = compute_rotation_part(joint_postions)
 
 jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
- 
+
+
+#joint_postions = np.array(joint_postions, dtype= np.float64)
+#joint_postions = joint_postions.tolist()
+np.float_(joint_postions)
 #px = 0.0825*c1*c2*c3 + 0.384*c1*c4*s2 - 0.0825*c1*s2*s4 + 0.316*c1*s2 - 0.0825*c4*(c1*c2*c3 - s1*s3) + 0.088*c6*(c5*(c1*s2*s4 + c4*(c1*c2*c3 - s1*s3)) - s5*(c1*c2*s3 + c3*s1)) - 0.107*c6*(c1*c4*s2 - s4*(c1*c2*c3 - s1*s3)) - 0.0825*s1*s3 - 0.384*s4*(c1*c2*c3 - s1*s3) + 0.107*s6*(c5*(c1*s2*s4 + c4*(c1*c2*c3 - s1*s3)) - s5*(c1*c2*s3 + c3*s1)) + 0.088*s6*(c1*c4*s2 - s4*(c1*c2*c3 - s1*s3))
 
 #py = 0.0825*c1*s3 + 0.0825*c2*c3*s1 + 0.384*c4*s1*s2 - 0.0825*c4*(c1*s3 + c2*c3*s1) + 0.088*c6*(c5*(c4*(c1*s3 + c2*c3*s1) + s1*s2*s4) - s5*(-c1*c3 + c2*s1*s3)) - 0.107*c6*(c4*s1*s2 - s4*(c1*s3 + c2*c3*s1)) - 0.0825*s1*s2*s4 + 0.316*s1*s2 - 0.384*s4*(c1*s3 + c2*c3*s1) + 0.107*s6*(c5*(c4*(c1*s3 + c2*c3*s1) + s1*s2*s4) - s5*(-c1*c3 + c2*s1*s3)) + 0.088*s6*(c4*s1*s2 - s4*(c1*s3 + c2*c3*s1))
 
 #pz = 0.384*c2*c4 - 0.0825*c2*s4 + 0.316*c2 + 0.0825*c3*c4*s2 + 0.384*c3*s2*s4 - 0.0825*c3*s2 - 0.107*c6*(c2*c4 + c3*s2*s4) + 0.088*c6*(c5*(c2*s4 - c3*c4*s2) + s2*s3*s5) + 0.088*s6*(c2*c4 + c3*s2*s4) + 0.107*s6*(c5*(c2*s4 - c3*c4*s2) + s2*s3*s5) + 0.333]
 
-print (jacobian)
+xyz = np.append(cartesian_cordinates[0],roll_pitch_yaw[0])
+print (xyz)
+print (jacobian.dtype)
+
+print (type(joint_postions))
+print (joint_postions)

@@ -23,23 +23,37 @@ def handle_compute_kinematics(message):
     [position[5],   math.pi/2, 0.0,     0.0    ] ,
     [position[6],   math.pi/2, 0.0,     0.088  ] ,
     [0,             0,         0.107,   0.0    ] ,
-    ] , dtype= 'float32')
-    
+    ] , dtype= 'float64')
+
     rotation_matrix = compute_rotation_matrix(dh_parameters) 
 
-    current_position.transformation_matrix = compute_joint_postions(rotation_matrix)
-
-    current_position.quaternions = compute_joint_position_quaternions(current_position.transformation_matrix)
-
-    current_position.roll_pitch_yaw = compute_roll_pitch_yaw(current_position.transformation_matrix)
+    transformation_matrix = compute_joint_postions(rotation_matrix)
     
-    current_position.cartesian_cordinates = get_cartesian_cordinates(current_position.transformation_matrix)
+    #quaternions = compute_joint_position_quaternions(transformation_matrix)
+
+    roll_pitch_yaw = compute_roll_pitch_yaw(transformation_matrix)
     
+    cartesian_cordinates = get_cartesian_cordinates(transformation_matrix)
+
+    rotation_part = compute_rotation_part(transformation_matrix)
+
+    jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
+
+    xyz_roll_pitch_yaw = join_vectors(cartesian_cordinates, roll_pitch_yaw)
+    current_position.transformation_matrix = transformation_matrix
+    current_position.xyz_roll_pitch_yaw = xyz_roll_pitch_yaw
+    current_position.jacobian  = jacobian
+
     print ("Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order")
-    
+  
     return forward_kinematics_serverResponse(current_position)
 
-
+def join_vectors(cartesian_cordinates, roll_pitch_yaw):
+     xyz_roll_pitch_yaw = []
+     for i in range(len(cartesian_cordinates)):
+          xr = np.append(cartesian_cordinates[i],roll_pitch_yaw[i])
+          xyz_roll_pitch_yaw.append(xr)
+     return xyz_roll_pitch_yaw
 
 def rotation_matrix(dh):
     T = np.array([[math.cos(dh[0]),                 -math.sin(dh[0]),                    0.0,              dh[3]],
@@ -65,7 +79,7 @@ def compute_joint_postions(rotation_matrices):
         
     return T
 
-def compute_quaternions(R):
+'''def compute_quaternions(R):
       magnitude = [
        math.sqrt(abs ( 1.0 + R[0][0] + R[1][1] + R[2][2] ) /4.0 ) ,
        math.sqrt(abs ( 1.0 + R[0][0] - R[1][1] - R[2][2] ) /4.0 ) ,
@@ -77,7 +91,7 @@ def compute_quaternions(R):
         ( R[2][1] - R[1][2] /( 4.0 * max(magnitude))),
         ( R[0][2] - R[2][0] /( 4.0 * max(magnitude))),
         ( R[1][0] - R[0][1] /( 4.0 * max(magnitude)))
-        ], dtype= 'float32')
+        ], dtype= 'float64')
       return quaternion
 
 def compute_joint_position_quaternions(rotation_matrices):
@@ -86,7 +100,7 @@ def compute_joint_position_quaternions(rotation_matrices):
          q = compute_quaternions(rotation_matrices[i])
          joint_position_quaternion.append(q)
      return joint_position_quaternion
-
+'''
 def compute_roll_pitch_yaw(transfromation_matrix):
      roll_pitch_yaw = []
      
@@ -120,9 +134,27 @@ def get_cartesian_cordinates(transfromation_matrix):
             transfromation_matrix [i][0][3],
             transfromation_matrix [i][1][3],
             transfromation_matrix [i][2][3]
-            ], dtype = 'float32')
+            ], dtype = 'float64')
             cartesian_cordinates.append(c_c)
        return cartesian_cordinates
+
+def compute_rotation_part(transfromation_matrix):
+     rotation_part = []
+     for i in range(len(transfromation_matrix)):
+          temp = np.array(transfromation_matrix[i][:3, :3])
+          rotation_part.append(temp)
+     rotation_part = np.array(rotation_part)
+     return rotation_part
+
+def compute_jacobian(rotation_part, traslation_part):
+     jacobian = np.zeros((7,6))
+     for i in range (len(rotation_part)-1):
+          n = len(rotation_part) - 1
+          cross_product = np.cross(np.array(rotation_part[i][:,2]),(np.array(np.array(traslation_part[n]) -traslation_part[i])))
+          jacobian[i] = np.append(  cross_product,     rotation_part[i][:,2] ,axis =0  )
+     jacobian = np.transpose(jacobian)
+     jacobian = jacobian.tolist()
+     return jacobian
 
 def compute_forward_kinematics_service():
     rospy.init_node("forward_kinmatics_service_node")

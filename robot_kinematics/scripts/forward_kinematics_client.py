@@ -11,19 +11,18 @@ from robot_kinematics.msg import kinematics_msgs
 
 
 def compute_forward_kinematics_client(position):
-    current_position = kinematics_msgs()
     try:
         compute_kinematics = rospy.ServiceProxy('compute_forward_kinematics_service', forward_kinematics_server)
-        current_position = compute_kinematics(position)
-        return current_position
+        return compute_kinematics(position)
+        
     except rospy.ServiceException as e:
         print ("Service call failed: %s" %e)
 
 def callback(message):
-    current_position = kinematics_msgs()
     position  = message.position
     current_position =compute_forward_kinematics_client(position)
     print (current_position)
+    
 
 
 
@@ -31,7 +30,6 @@ def callback(message):
 def get_current_position():
     rospy.init_node('get_current_position', anonymous=True)
     rospy.wait_for_service('compute_forward_kinematics_service')
-    
     topic = "/joint_states"
     rospy.Subscriber(topic, JointState, callback)
     # spin() simply keeps python from exiting until this node is stopped
