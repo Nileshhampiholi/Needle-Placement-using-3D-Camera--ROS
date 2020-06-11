@@ -7,46 +7,59 @@ from robot_kinematics.srv import forward_kinematics_server
 from robot_kinematics.srv import forward_kinematics_serverRequest
 from robot_kinematics.srv import forward_kinematics_serverResponse
 
-from robot_kinematics.msg import kinematics_msgs
 
 
 def handle_compute_kinematics(message):
     position  = message.dh_parameters
-    current_position = kinematics_msgs()
-    
-    dh_parameters =np.array ( [
-    [position[0],   0.0,       0.333,   0.0    ] ,
-    [position[1],  -math.pi/2, 0.0,     0.0    ] ,
-    [position[2],   math.pi/2, 0.316,   0.0    ] ,
-    [position[3],   math.pi/2, 0.0,     0.0825 ] ,
-    [position[4],  -math.pi/2, 0.384,  -0.0825 ] ,
-    [position[5],   math.pi/2, 0.0,     0.0    ] ,
-    [position[6],   math.pi/2, 0.0,     0.088  ] ,
-    [0,             0,         0.107,   0.0    ] ,
-    ] , dtype= 'float64')
+    #current_jacobian  = Float32MultiArray()
+    current_jacobian = compute(position)
+    print ("Returning jacobian and state vector ")
+   
+    return forward_kinematics_serverResponse(current_jacobian)
 
-    rotation_matrix = compute_rotation_matrix(dh_parameters) 
+def compute(position):
+     dh_parameters =np.array ( [
+          [position[0],   0.0,       0.333,   0.0    ] ,
+          [position[1],  -math.pi/2, 0.0,     0.0    ] ,
+          [position[2],   math.pi/2, 0.316,   0.0    ] ,
+          [position[3],   math.pi/2, 0.0,     0.0825 ] ,
+          [position[4],  -math.pi/2, 0.384,  -0.0825 ] ,
+          [position[5],   math.pi/2, 0.0,     0.0    ] ,
+          [position[6],   math.pi/2, 0.0,     0.088  ] ,
+          [0,             0,         0.107,   0.0    ] ,
+          ])
 
-    transformation_matrix = compute_joint_postions(rotation_matrix)
-    
-    #quaternions = compute_joint_position_quaternions(transformation_matrix)
+     rotation_matrix = compute_rotation_matrix(dh_parameters) 
 
-    roll_pitch_yaw = compute_roll_pitch_yaw(transformation_matrix)
-    
-    cartesian_cordinates = get_cartesian_cordinates(transformation_matrix)
+     transformation_matrix = compute_joint_postions(rotation_matrix)
+     
+     #quaternions = compute_joint_position_quaternions(transformation_matrix)
 
-    rotation_part = compute_rotation_part(transformation_matrix)
+     roll_pitch_yaw = compute_roll_pitch_yaw(transformation_matrix)
+     
+     cartesian_cordinates = get_cartesian_cordinates(transformation_matrix)
 
-    jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
+     rotation_part = compute_rotation_part(transformation_matrix)
 
-    xyz_roll_pitch_yaw = join_vectors(cartesian_cordinates, roll_pitch_yaw)
-    current_position.transformation_matrix = transformation_matrix
-    current_position.xyz_roll_pitch_yaw = xyz_roll_pitch_yaw
-    current_position.jacobian  = jacobian
+     jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
 
-    print ("Returning trasformation_matrices , quaternions, roll_pitch_yaw, and cartesian cordinates in the given order")
+     xyz_roll_pitch_yaw = join_vectors(cartesian_cordinates,roll_pitch_yaw)
+     
+     x= xyz_roll_pitch_yaw[7]
+     x = np.append(x, [0])
+     jacobian = np.append(jacobian,x)
+     print (x)
+     print ('')
+     print (jacobian)
+
+     j = []
+     for i in range(len(jacobian)):
+          j = np.append(j , jacobian[i] )
   
-    return forward_kinematics_serverResponse(current_position)
+     j = j.tolist()
+     return j
+
+
 
 def join_vectors(cartesian_cordinates, roll_pitch_yaw):
      xyz_roll_pitch_yaw = []
@@ -153,7 +166,6 @@ def compute_jacobian(rotation_part, traslation_part):
           cross_product = np.cross(np.array(rotation_part[i][:,2]),(np.array(np.array(traslation_part[n]) -traslation_part[i])))
           jacobian[i] = np.append(  cross_product,     rotation_part[i][:,2] ,axis =0  )
      jacobian = np.transpose(jacobian)
-     jacobian = jacobian.tolist()
      return jacobian
 
 def compute_forward_kinematics_service():

@@ -2,20 +2,19 @@
 import rospy
 import math
 import numpy as np
-from std_msgs.msg import Float64MultiArray
 from robot_kinematics.msg import kinematics_msgs
 
 
 
 def states_callback(msg):
 
-    print(msg.position)
+    print(msg.transformation_matrix)
 
 if __name__ == '__main__':
 
     rospy.init_node('inverse_kinematics')
     topic_name = 'robot_kinematics'
-    rospy.Subscriber(topic_name, JointState, states_callback)
+    rospy.Subscriber(topic_name, kinematics_msgs, states_callback)
     rospy.spin()
 
 
@@ -51,7 +50,7 @@ if __name__ == '__main__':
 
 
 
-
+'''
 if __name__ == '__main__':
     
     rospy.init_node('inverse_kinematics')
@@ -75,3 +74,4 @@ if __name__ == '__main__':
 
     pub.publish(msg)
     
+'''

@@ -5,12 +5,38 @@ from sensor_msgs.msg import JointState
 import math
 import numpy as np
 from geometry_msgs.msg import Transform
-from robot_kinematics.msg import kinematics_msgs
+from std_msgs.msg import Float64MultiArray
 
+global position
 
 def callback(message):
+     abc  = Float64MultiArray()
+     global position
      position  = message.position
-     current_position = kinematics_msgs()
+    
+     print('')
+     print(position)
+     print ('')
+     jacobian = xxxxx(position)
+    
+     
+     X = []
+     for i in range(len(jacobian)):
+          X = np.append(X,jacobian[i])
+     print (X)
+     
+     
+     
+     abc.lable = 'jacobian'
+     abc.data = X
+     pub = rospy.Publisher('forward_kinematics', Float64MultiArray, queue_size=1)
+     rate = rospy.Rate(1) # 1hz
+     pub.publish(abc)
+
+ 
+
+
+def xxxxx(position):
      dh_parameters = [
      [position[0],   0.0,       0.333,   0.0    ] ,
      [position[1],  -math.pi/2, 0.0,     0.0    ] ,
@@ -21,31 +47,23 @@ def callback(message):
      [position[6],   math.pi/2, 0.0,     0.088  ] ,
      [0,             0,         0.107,   0.0    ] ,
      ] 
-     frame = 0
      rotation_matrix = compute_rotation_matrix(dh_parameters) 
      trasfromation_matrix = compute_joint_postions(rotation_matrix)
-     #joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
+     joint_position_quaternions = compute_joint_position_quaternions(trasfromation_matrix)
      roll_pitch_yaw = compute_roll_pitch_yaw(trasfromation_matrix)
      cartesian_cordinates = get_cartesian_cordinates(trasfromation_matrix)
      rotation_part = compute_rotation_part(trasfromation_matrix)
      jacobian = compute_jacobian(rotation_part,cartesian_cordinates)
-     xyz_roll_pitch_yaw = join_vectors(cartesian_cordinates, roll_pitch_yaw)
-     
-     current_position.transformation_matrix = trasfromation_matrix
-     current_position.xyz_roll_pitch_yaw =xyz_roll_pitch_yaw
-     current_position.jacobian = jacobian
+     return jacobian
 
-     rospy.loginfo(rospy.get_caller_id() + 'I heard %s',1 ) 
-     pub = rospy.Publisher('robot_kinematics', kinematics_msgs, queue_size=10)
-     pub.publish(current_position)
-     print (current_position)
+
      
 def forward_kinematics():
     rospy.init_node('forward_kinematics', anonymous=True)
     topic = "/joint_states"
     rospy.Subscriber(topic, JointState, callback)
+    rospy.sleep(1)
     # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
 
 def join_vectors(cartesian_cordinates, roll_pitch_yaw):
      xyz_roll_pitch_yaw = []
@@ -77,7 +95,7 @@ def compute_joint_postions(rotation_matrices):
         T.append(X)
     return T
 
-'''def compute_quaternions(R):
+def compute_quaternions(R):
       magnitude = [
        math.sqrt(abs ( 1 + R[0][0] + R[1][1] + R[2][2] ) /4 ) ,
        math.sqrt(abs ( 1 + R[0][0] - R[1][1] - R[2][2] ) /4 ) ,
@@ -92,7 +110,7 @@ def compute_joint_postions(rotation_matrices):
         ])
       return quaternion
 
-def compute_joint_position_quaternions(rotation_matrices):'''
+def compute_joint_position_quaternions(rotation_matrices):
      joint_position_quaternion = []
      q = 0
      for i in range(len(rotation_matrices)):
@@ -150,9 +168,11 @@ def compute_jacobian(rotation_part, traslation_part):
      jacobian = np.zeros((7,6))
      for i in range (len(rotation_part)-1):
           n = len(rotation_part) - 1
+          print ([i ,n ])
           cross_product = np.cross(np.array(rotation_part[i][:,2]),(np.array(np.array(traslation_part[n]) -traslation_part[i])))
           jacobian[i] = np.append(  cross_product,     rotation_part[i][:,2] ,axis =0  )
      jacobian = np.transpose(jacobian)
+     jacobian = jacobian.tolist()
      return jacobian
 
 def compute_rotation_part(transfromation_matrix):
@@ -165,8 +185,17 @@ def compute_rotation_part(transfromation_matrix):
 
 if __name__ == '__main__':
     forward_kinematics()
+    i = 5
+    while (i >1 ):
+          
+          print ("")
+          print (i)
+          print (jacobian)
+          i = i-1
+          rospy.sleep(1)
+     
 
-  
+    rospy.spin()
 
 
 
